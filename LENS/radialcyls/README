@@ -1,0 +1,33 @@
+
+In matlab:
+
+>> quick_lens
+
+will produce 
+
+   rea.nel       Number of elements
+   rea.xy        X-Y data
+   rea.cs        Curve side data
+   rea.xyc       centers of circles (for flat lens)
+
+
+Then, the unix script
+
+mkq
+
+will first build qq.rea, then it will assign boundary conditions
+in a new mesh
+
+qqc.rea
+
+
+
+If you want more rings of disks, edit quick_lens.m and change
+the first loop index.  For example,
+
+for k=1:9;
+
+will generate 9 rings.
+
+
+

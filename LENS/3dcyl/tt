@@ -1,0 +1,33 @@
+c-----------------------------------------------------------------------
+      nx1_2 = nx1/2
+c     Set the permittivities
+      do e = 1,nelt
+         xx=xm1(nx1_2,nx1_2,1,e)
+         yy=ym1(nx1_2,nx1_2,1,e)
+         rr= xx**2+yy**2
+         rr= sqrt(rr)        
+    
+         if (rr.lt.0.5) then
+           if (abs(zz).lt.0.0357) then
+            do i = 1,nxyz
+               j = i+nxyz*(e-1)
+               permittivity(j) = eps2
+               permeability(j) = mu2
+            enddo
+           else
+            do i = 1,nxyz
+               j = i+nxyz*(e-1)
+               permittivity(j) = eps1
+               permeability(j) = mu1
+            enddo
+           endif
+
+         else
+c     Lower region
+            do i = 1,nxyz
+               j = i+nxyz*(e-1)
+               permittivity(j) = eps1
+               permeability(j) = mu1
+            enddo
+         endif
+      enddo
