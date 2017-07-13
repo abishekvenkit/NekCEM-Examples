@@ -1,0 +1,27 @@
+pretex << EOF
+zz2
+   1 READ PREVIOUS PARAMETERS 
+qq
+   1 BUILD FROM FILE          
+qq
+   3 GLOBAL REFINE            
+   7 REPLICATE/ROTATE         
+3  Rep. (1), Rot. (2), Rep/Rot (3) Template (4)? (0=abort)
+45  Input rotation angle (deg):
+3   Input number of reps (e.g., 1 --> double mesh size)
+   1 END GLOBAL REFINE        
+  10 IMPORT MESH              
+c00
+n   Displace elements in box (y)? Translate?(t) n
+   1 END    ELEMENTS          
+   1 ACCEPT MATL,QVOL         
+   1 SET BCs                  
+  11 SET ENTIRE LEVEL         
+   8 SYMMETRY                 
+   1 END  LEVEL               
+   1 ACCEPT B.C.'s            
+   1 EXIT                     
+EOF
+
+echo zz2 > SESSION.NAME
+postx &

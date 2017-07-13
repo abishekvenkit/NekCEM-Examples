@@ -1,0 +1,301 @@
+c-----------------------------------------------------------------------
+c
+c     Normally-incident plane wave striking a dielectric interface.
+c
+c-----------------------------------------------------------------------
+      subroutine userinc(tt,incfhx,incfhy,incfhz,incfex,incfey,incfez)
+c-----------------------------------------------------------------------
+      implicit none
+      include 'SIZE'
+
+      real tt
+      real incfhx(lxzfl),incfhy(lxzfl),incfhz(lxzfl)
+      real incfex(lxzfl),incfey(lxzfl),incfez(lxzfl)
+
+      return
+      end
+c-----------------------------------------------------------------------
+      subroutine userini(tt,hx,hy,hz,ex,ey,ez)
+c-----------------------------------------------------------------------
+      implicit none
+      include 'SIZE'
+
+      real tt
+      real hx(lpts),hy(lpts),hz(lpts)
+      real ex(lpts),ey(lpts),ez(lpts)
+
+      return
+      end
+c-----------------------------------------------------------------------
+      subroutine usersol(tt,solhx,solhy,solhz,solex,soley,solez)
+c-----------------------------------------------------------------------
+      implicit none
+      include 'SIZE'
+
+      real tt
+      real solhx(lpts),solhy(lpts),solhz(lpts)
+      real solex(lpts),soley(lpts),solez(lpts)
+
+      return
+      end
+c-----------------------------------------------------------------------
+      subroutine usersrc(tt,srchx,srchy,srchz,srcex,srcey,srcez)
+c-----------------------------------------------------------------------
+      implicit none
+      include 'SIZE'
+
+      real tt
+      real srchx(lpts),srchy(lpts),srchz(lpts)
+      real srcex(lpts),srcey(lpts),srcez(lpts)
+
+      return
+      end
+c-----------------------------------------------------------------------
+      subroutine userfsrc(tt,srcfhx,srcfhy,srcfhz,srcfex,srcfey,srcfez)
+c-----------------------------------------------------------------------
+      implicit none
+      include 'SIZE'
+
+      real tt
+      real srcfhx(lxzfl),srcfhy(lxzfl),srcfhz(lxzfl)
+      real srcfex(lxzfl),srcfey(lxzfl),srcfez(lxzfl)
+
+      return
+      end
+c-----------------------------------------------------------------------
+      subroutine uservp(ix,iy,iz,iel)
+c-----------------------------------------------------------------------
+      implicit none
+      include 'SIZE'
+      include 'TOTAL'
+      include 'EMWAVE'
+
+      common /userparam/
+     $     omega,               ! frequency of the incident wave
+     $     eps1,                ! permittivity in upper region
+     $     eps2,                ! permittivity in lower region
+     $     mu1,                 ! permeability in upper region
+     $     mu2,                 ! permeability in lower region
+     $     reflte,              ! TE reflection coefficient
+     $     trante,              ! TE transmission coefficient
+     $     refltm,              ! TM reflection coefficient
+     $     trantm               ! TM transmission coefficient
+      real omega,eps1,eps2,mu1,mu2,reflte,trante,refltm,trantm
+
+      common /userincvars/ incindex,ninc
+      integer incindex(lxzfl),ninc
+
+      common /userlogic/ twomat
+      logical twomat
+
+c     These don't do anything! This is a temporary measure until
+c
+c     https://github.com/NekCEM/NekCEM/issues/12
+c
+c     is resolved.
+      integer ix,iy,iz,iel
+
+      logical markinc
+      integer e,f,i,j,k,nx1_2
+      real z1,z2
+
+c     Do some evil hijacking of .rea parameters to determine whether
+c     there should be a material interface. Need to work out a better
+c     way to do this.
+      if (param(70).eq.1) then
+         twomat = .true.
+      else
+         twomat = .false.
+      endif
+
+      omega = 2.0
+      eps1 = 1.0
+      if (twomat) then
+         eps2 = 2.0
+      else
+         eps2 = 1.0
+      endif
+      mu1 = 1.0
+      mu2 = 1.0
+
+      z1 = sqrt(mu1/eps1)
+      z2 = sqrt(mu2/eps2)
+      reflte = (z1-z2)/(z1+z2)
+      trante = 2*z1/(z1+z2)
+      refltm = (z2-z1)/(z1+z2)
+      trantm = 2*z2/(z1+z2)
+
+      nx1_2 = nx1/2
+c     Set the permittivity and permeability
+      do e = 1,nelt
+         do i = 1,nxyz
+            j = i+nx1*ny1*nz1*(e-1)
+            if (ym1(nx1_2,nx1_2,nx1_2,e).gt.0) then
+c     Upper region
+               permittivity(j) = eps1
+               permeability(j) = mu1
+            else
+c     Lower region
+               permittivity(j) = eps2
+               permeability(j) = mu2
+            endif
+         enddo
+      enddo
+
+c     Build an index of where the incident field needs to be added
+      ninc = 0
+      do e = 1,nelt
+         if (ym1(nx1_2,nx1_2,nx1_2,e).gt.0.0) then
+            markinc = .true.
+            do f = 1,nfaces
+               do i = 1,nxzf
+c     j is the global face number
+                  j = (e-1)*nxzf*nfaces+nxzf*(f-1)+i
+c     k is the volume global number associated with face j.
+                  k = cemface(j)
+                  if (abs(ym1(k,1,1,1)).gt.1e-8) then
+                     markinc = .false.
+                     exit
+                  endif
+               enddo
+               if (markinc) then
+                  do i = 1,nxzf
+                     ninc = ninc+1
+                     j = (e-1)*nxzf*nfaces+nxzf*(f-1)+i
+                     incindex(ninc) = j
+                  enddo
+               endif
+            enddo
+         endif
+      enddo
+
+!$ACC ENTER DATA COPYIN(incindex)
+
+      return
+      end
+c-----------------------------------------------------------------------
+      subroutine usrdat
+c-----------------------------------------------------------------------
+      implicit none
+
+      return
+      end
+c-----------------------------------------------------------------------
+      subroutine usrdat2
+c-----------------------------------------------------------------------
+c     Use this subroutine to set the dimensions of the domain.
+      implicit none
+      include 'SIZE'
+
+      return
+      end
+c-----------------------------------------------------------------------
+      subroutine userchk
+c-----------------------------------------------------------------------
+      implicit none
+      include 'SIZE'
+      include 'TOTAL'
+      include 'EMWAVE'
+
+      common /ccpu/  cpu_t,cpu_dtime,cpu_chk
+      real cpu_t,cpu_dtime,cpu_chk
+
+      common /userlogic/ twomat
+      logical twomat
+
+      integer i
+      real l2(6),linf(6)
+      real l2tol(6),linftol(6)
+      real cpu_p_t
+
+      if (twomat) then
+         l2tol(1) = 5e-4
+         l2tol(2) = 5e-14
+         l2tol(3) = 5e-4
+         l2tol(4) = 5e-4
+         l2tol(5) = 5e-14
+         l2tol(6) = 5e-4
+
+         linftol(1) = 5e-3
+         linftol(2) = 1e-12
+         linftol(3) = 5e-3
+         linftol(4) = 5e-3
+         linftol(5) = 1e-12
+         linftol(6) = 5e-3
+      else
+         l2tol(1) = 5e-4
+         l2tol(2) = 5e-14
+         l2tol(3) = 5e-4
+         l2tol(4) = 5e-4
+         l2tol(5) = 5e-14
+         l2tol(6) = 5e-4
+
+         linftol(1) = 5e-3
+         linftol(2) = 5e-12
+         linftol(3) = 5e-3
+         linftol(4) = 5e-3
+         linftol(5) = 5e-12
+         linftol(6) = 5e-3
+      endif
+
+      if (istep.le.10.or.mod(istep,iocomm).eq.0) then
+         call usersol
+     $     (time,shn(1,1),shn(1,2),shn(1,3),sen(1,1),sen(1,2),sen(1,3))
+!$ACC UPDATE HOST(en,hn)
+         call cem_error(hn(1,1),shn(1,1),errhn(1,1),npts,l2(1),linf(1))
+         call cem_error(hn(1,2),shn(1,2),errhn(1,2),npts,l2(2),linf(2))
+         call cem_error(hn(1,3),shn(1,3),errhn(1,3),npts,l2(3),linf(3))
+         call cem_error(en(1,1),sen(1,1),erren(1,1),npts,l2(4),linf(4))
+         call cem_error(en(1,2),sen(1,2),erren(1,2),npts,l2(5),linf(5))
+         call cem_error(en(1,3),sen(1,3),erren(1,3),npts,l2(6),linf(6))
+
+         call userprint(istep,time,dt,l2,linf,cpu_t,cpu_p_t)
+
+c$$$         do i = 1,6
+c$$$            if (l2(i).gt.l2tol(i)) call exitt(1)
+c$$$            if (linf(i).gt.linftol(i)) call exitt(1)
+c$$$         enddo
+      endif
+
+#ifdef _OPENACC
+      if (istep.eq.nsteps) call finalize
+#endif
+
+      return
+      end
+c-----------------------------------------------------------------------
+      subroutine userprint(istep,tt,dt,l2,linf,t1,t2)
+c-----------------------------------------------------------------------
+      implicit none
+      include 'SIZE'
+
+      integer istep
+      real tt,dt,t1,t2
+      real l2(6),linf(6)
+
+      integer k
+
+      if (nid.eq.0) then
+         write(6,101) istep,nelt,nx1-1,npts,tt,dt,(l2(k),k=1,6),t1,t2
+         write(6,102) istep,nelt,nx1-1,npts,tt,dt,(linf(k),k=1,6),t1,t2
+      endif
+
+ 101  format(/,i10,i6,i4,i9,1p9e10.3,e9.2,' CPU: L2')
+ 102  format(  i10,i6,i4,i9,1p9e10.3,e9.2,' CPU: Linf')
+
+      return
+      end
+c-----------------------------------------------------------------------
+      subroutine finalize
+c-----------------------------------------------------------------------
+      implicit none
+      include 'SIZE'
+
+      common /userincvars/ incindex,ninc
+      integer incindex(lxzfl),ninc
+
+!$ACC EXIT DATA DELETE(incindex)
+
+      return
+      end
+c-----------------------------------------------------------------------
