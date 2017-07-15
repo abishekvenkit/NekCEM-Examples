@@ -127,7 +127,7 @@ c       inside cylinder
                permittivity(j) = 130 
                permeability(j) = 1.0 
              else
-               permittivity(j) = 1.0 
+               permittivity(j) = 1.96 
                permeability(j) = 1.0
              endif
            enddo
@@ -136,7 +136,7 @@ c       inside cylinder
 c     outside cylinder
           do i = 1,nxyz
              j = i+nxyz*(e-1)
-             permittivity(j) = 1.0 
+             permittivity(j) = 1.96 
              permeability(j) = 1.0 
            enddo
 
