@@ -1,11 +1,10 @@
-clear all
-close all
+function lens_mesh(rea_file,out_file,new_rad,new_gap)
 
-rea_file = input('What is your .rea filename? (must located in same folder):  ','s');
-out_file = input('Name the output file:   ','s');
+%rea_file = input('What is your .rea filename? (must located in same folder):  ','s');
+%out_file = input('Name the output file:   ','s');
 
-new_rad = input('What is your new radius? (0.5 to keep the same)  ');
-new_gap = input('What is your new gap? (0.10435 to keep the same)  ');
+%new_rad = input('What is your new radius? (0.5 to keep the same)  ');
+%new_gap = input('What is your new gap? (0.10435 to keep the same)  ');
 
 
 % Step 1: read .rea file
@@ -67,24 +66,25 @@ data.curve = dc;
 
 
 % Step 5: plotting
-figure(1)
-for e=1:E
-    v = data_old.vertex;
-    plot([v(e,:,1),v(e,1,1)],[v(e,:,2),v(e,1,2)],'ob-'); hold on
-    text(sum(v(e,:,1))/4,sum(v(e,:,2))/4,num2str(e))
-end
-title('old mesh')
-axis equal
-
-figure(2)
-for e=1:E
-    v = data.vertex;
-    plot([v(e,:,1),v(e,1,1)],[v(e,:,2),v(e,1,2)],'ob-'); hold on
-    text(sum(v(e,:,1))/4,sum(v(e,:,2))/4,num2str(e))
-end
-title('new mesh')
-axis equal
+%figure(1)
+%for e=1:E
+%    v = data_old.vertex;
+%    plot([v(e,:,1),v(e,1,1)],[v(e,:,2),v(e,1,2)],'ob-'); hold on
+%    text(sum(v(e,:,1))/4,sum(v(e,:,2))/4,num2str(e))
+%end
+%title('old mesh')
+%axis equal
+%
+%figure(2)
+%for e=1:E
+%    v = data.vertex;
+%    plot([v(e,:,1),v(e,1,1)],[v(e,:,2),v(e,1,2)],'ob-'); hold on
+%    text(sum(v(e,:,1))/4,sum(v(e,:,2))/4,num2str(e))
+%end
+%title('new mesh')
+%axis equal
 
 % Step 6: output
 write_rea(rea_file,out_file,data);
 
+end
