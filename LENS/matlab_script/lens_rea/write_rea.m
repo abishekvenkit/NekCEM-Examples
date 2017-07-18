@@ -36,7 +36,6 @@ for i=1:sec_num(1)
     fprintf(fid_out,fline);
 end
 
-
 % Sec 2: read vertices of elements
 fline = fgets(fid_ref);
 fprintf(fid_out,fline);
@@ -57,7 +56,7 @@ for e=1:E
     fprintf(fid_out,'\n');
 end
 
-% Sec 3: read spetial curves
+% Sec 3: read special curves
 fline = fgets(fid_ref);fprintf(fid_out,fline);
 fline = fgets(fid_ref);fprintf(fid_out,fline);
 num_c = data.num_c;
@@ -100,5 +99,6 @@ end
 
 fclose(fid_ref);
 end
+
 
 

@@ -15,8 +15,8 @@ E = data_old.info.E; % number of the element
 
 
 % Step 2 Identify points <<<<<< main script
-rad = 0.5 %radius of original cylinder mesh
-gap = .10435 %gap of original cylinder mesh
+rad = 0.5; %radius of original cylinder mesh
+gap = .10435; %gap of original cylinder mesh
 
 v = data.vertex;
 cir = 0*v;
@@ -29,6 +29,8 @@ for e = 1:E;
         end
     end
 end
+
+% Step 3: Modify verticies
 
 for e = 1:E;
     for i = 1:4;
@@ -43,8 +45,28 @@ for e = 1:E;
 end
 data.vertex = v;
 
+% Step 4: Modify curve information
+de = data.edge_type;
+dc = data.curve;
+for e = 1:E;
+    for i = 1:4;
+        s = de(e,i);
+        if (strcmp(s,'C'))
+           dc(e,i,1) = (new_rad/rad)*dc(e,i,1);
+        elseif (cir(e,i))
+           dc(e,i,1) = (new_rad/rad)*dc(e,i,1);
+           dc(e,i,2) = (new_rad/rad)*dc(e,i,2);
+        elseif (strcmp(s, 'm'))
+           dc(e,i,1) = (new_gap/gap)*dc(e,i,1);
+           dc(e,i,2) = (new_gap/gap)*dc(e,i,2);
+        end
+    end
+end
+data.edge_type = de;
+data.curve = dc;   
 
-% Step 3: plotting
+
+% Step 5: plotting
 figure(1)
 for e=1:E
     v = data_old.vertex;
@@ -63,6 +85,6 @@ end
 title('new mesh')
 axis equal
 
-% Step 4: output 
-write_rea(rea_file,out_file,data_old);
+% Step 6: output
+write_rea(rea_file,out_file,data);
 
