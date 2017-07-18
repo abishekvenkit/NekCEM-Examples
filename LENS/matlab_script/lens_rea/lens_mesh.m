@@ -45,24 +45,43 @@ end
 data.vertex = v;
 
 % Step 4: Modify curve information
-de = data.edge_type;
-dc = data.curve;
-for e = 1:E;
-    for i = 1:4;
-        s = de(e,i);
-        if (strcmp(s,'C'))
-           dc(e,i,1) = (new_rad/rad)*dc(e,i,1);
-        elseif (cir(e,i))
-           dc(e,i,1) = (new_rad/rad)*dc(e,i,1);
-           dc(e,i,2) = (new_rad/rad)*dc(e,i,2);
-        elseif (strcmp(s, 'm'))
-           dc(e,i,1) = (new_gap/gap)*dc(e,i,1);
-           dc(e,i,2) = (new_gap/gap)*dc(e,i,2);
+%de = data.edge_type;
+%dc = data.curve;
+%for e = 1:E;
+%   for i = 1:4;
+%        s = de(e,i);
+%        if (strcmp(s,'C'))
+%           dc(e,i,1) = (new_rad/rad)*dc(e,i,1);
+%        elseif (cir(e,i))
+%           dc(e,i,1) = (new_rad/rad)*dc(e,i,1);
+%           dc(e,i,2) = (new_rad/rad)*dc(e,i,2);
+%        elseif (strcmp(s, 'm'))
+%           dc(e,i,1) = (new_gap/gap)*dc(e,i,1);
+%           dc(e,i,2) = (new_gap/gap)*dc(e,i,2);
+%        end
+%    end
+%end
+%data.edge_type = de;
+%data.curve = dc;
+
+edge = data.edge_type;
+curve = data.curve;
+for i=1:E
+    for j=1:4
+        if data.bool_curve(i,j)
+            switch char(edge(i,j))
+                case 'm' % midle pt
+                    next_ind = mod(j,4)+1;
+                    curve(i,j,1:2) = 0.5*(data.vertex(i,next_ind,1:2) + data.vertex(i,j,1:2));
+                case 'C' % circle
+                    curve(i,j,1) = sqrt(sum(data.vertex(i,j,:).^2));
+                    curve(i,j,2:end) = 0;
+            end
         end
     end
 end
-data.edge_type = de;
-data.curve = dc;   
+
+data.curve = curve;   
 
 
 % Step 5: plotting
