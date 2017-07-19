@@ -1,0 +1,24 @@
+pretex << EOF
+a33
+   1 READ PREVIOUS PARAMETERS 
+a2
+   1 BUILD FROM FILE          
+a2
+   3 GLOBAL REFINE            
+  11 STRETCH                  
+   5 Stretch R                
+0.5  Input protected radius:
+-.7 0.7  Input new xmin/xmax (0,0 to scale):  -6.000000E-01  6.000000E-01
+-.7 0.7  Input new ymin/ymax (0,0 to scale):  -6.000001E-01  6.000000E-01
+   1 UP MENU                  
+   1 END GLOBAL REFINE        
+   4 CURVE SIDES              
+   8 Convert Midside to Circle
+500  Input maxium radius:
+   1 BUILD MENU               
+   1 END    ELEMENTS          
+   1 ACCEPT MATL,QVOL         
+   1 ACCEPT B.C.'s            
+   1 ACCEPT B.C.'s            
+   1 EXIT                     
+EOF
