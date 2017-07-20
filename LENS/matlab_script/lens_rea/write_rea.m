@@ -13,22 +13,42 @@ function write_rea(ref_rea,out_rea,data)
 % data.BC_type:     type of BC, P/E/...
 % data.BC:          parameters of BC
 
+E = data.info.E;
+
+
 
 fid_ref = fopen(ref_rea,'r');
 fid_out = fopen(out_rea,'w');
 sec_num(1) = 143; % irrelative lines
 
+% define format
+if E < 1000
+    fm31 = ['%3d%3d']; %I3 I3
+    fm42 = ['%3d%3d'];
+elseif E < 1000000
+    fm31 = ['%2d%6d']; %I2 I6
+    fm42 = ['%5d%1d'];
+else
+    fm31 = ['%2d%12d']; %I2 I12
+    fm42 = ['%12d%1d'];
+end
+% Sec 2: MESH DATA
+% Sec 3: CURVED SIDE DATA
+% Sec 4: BOUNDARY-FLUID
+sp1 = ' ';
 sp2 = '  ';
+sp3 = '   ';
 sp4 = '    ';
+sp5 = '     ';
 sp6 = '      ';
+sp7 = '       ';
 
-fm2 = [sp2 '%.7f' sp6 '%.7f' sp6 '%.7f' sp6 '%.7f'];
-fm31 = [sp2 '%d  %d'];
-fm32 = [sp2 '%.5E' sp6 '%.5E' sp6 '%.5E' sp6 '%.5E' sp6 '%.5E'];
-fm33 = [sp6 '%c \n'];
-fm41 = [sp2 '%c'];
-fm42 = [sp4 '%d  %d'];
-fm43 = [sp4 '%.7f' sp6 '%.4f' sp6 '%.4f' sp6 '%.4f' sp6 '%.4f\n'];
+fm2 = [sp1 '% .7f' sp5 '% .7f' sp5 '% .7f' sp5 '% .7f'];
+fm32 = [sp1 '% 1.6f' sp5 '% 1.6f' sp5 '% 1.6f' sp5 '% 1.6f' sp5 '% 1.6f'];
+fm33 = [sp1 '%c\n'];
+fm41 = [sp1 '%c' sp2];
+fm43 = ['\n'];
+
 
 % Sec 1: go through sec 1
 for i=1:sec_num(1)
@@ -36,7 +56,8 @@ for i=1:sec_num(1)
     fprintf(fid_out,fline);
 end
 
-% Sec 2: read vertices of elements
+
+% Sec 2: vertices of elements
 fline = fgets(fid_ref);
 fprintf(fid_out,fline);
 E = data.info.E;
@@ -56,7 +77,7 @@ for e=1:E
     fprintf(fid_out,'\n');
 end
 
-% Sec 3: read special curves
+% Sec 3: spetial curves
 fline = fgets(fid_ref);fprintf(fid_out,fline);
 fline = fgets(fid_ref);fprintf(fid_out,fline);
 num_c = data.num_c;
@@ -67,9 +88,18 @@ for i=1:E
     for j=1:4
         if data.bool_curve(i,j)
             fline = fgets(fid_ref); % do nothing
-            
+%             switch char(edge(i,j))
+%                 case 'm' % midle pt
+%                     next_ind = mod(j,4)+1;
+%                     curve(i,j,1:2) = 0.5*(vertex(i,next_ind,1:2) + vertex(i,j,1:2));
+%                 case 'C' % circle
+%                     minus = sign(curve(i,j,1)); % adjust "-"
+%                     curve(i,j,1) = sqrt(sum(vertex(i,j,:).^2));
+%                     curve(i,j,2:end) = 0;
+%             end
             fprintf(fid_out,fm31,j,i);
-            fprintf(fid_out,fm32,curve(i,j,:));  
+            out_str = f_format(curve(i,j,:),7,'F');
+            fprintf(fid_out,out_str);  
             fprintf(fid_out,fm33,char(edge(i,j)));
         end
     end
@@ -86,8 +116,10 @@ for i=1:E
     for j=1:4
         fline = fgets(fid_ref); % do nothing
         fprintf(fid_out,fm41,char(BC_type(i,j)));
-        fprintf(fid_out,fm42,i,j);  
-        fprintf(fid_out,fm43,BC(i,j,:));
+        fprintf(fid_out,fm42,i,j); 
+        out_str = f_format(BC(i,j,:),6,'F');
+        fprintf(fid_out,out_str); 
+        fprintf(fid_out,fm43);
     end
 end
 
@@ -99,6 +131,5 @@ end
 
 fclose(fid_ref);
 end
-
 
 

@@ -1,13 +1,15 @@
+x = 0.5
+
 pretex << EOF
-a33
+2
    1 READ PREVIOUS PARAMETERS 
-a2
+single
    1 BUILD FROM FILE          
-a2
+single
    3 GLOBAL REFINE            
   11 STRETCH                  
    5 Stretch R                
-0.5  Input protected radius:
+$x  Input protected radius:
 -.7 0.7  Input new xmin/xmax (0,0 to scale):  -6.000000E-01  6.000000E-01
 -.7 0.7  Input new ymin/ymax (0,0 to scale):  -6.000001E-01  6.000000E-01
    1 UP MENU                  
