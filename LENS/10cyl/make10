@@ -1,5 +1,5 @@
 #!/bin/bash
-
+#                rad gap
 python make2d.py 100 10 1
 python make2d.py 100 20 2
 python make2d.py 100 30 3
