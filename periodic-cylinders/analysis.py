@@ -52,8 +52,8 @@ class FittedSine():
 
 
 def main():
-    firststep = 5000
-    laststep = 18000
+    firststep = 18000
+    laststep = 25300
     step = 50
 
     dt = 1.83e-3
@@ -68,14 +68,15 @@ def main():
     y = load_buf('vtk/ycoordinates.dat')
 
     phi = []
-    start = 0
-    end = x.size
+    start = x.size//2
+    end = x.size//2+1
     for index in range(start, end):
         hx = get_timeseries(index, firststep, laststep, step)
         times = dt*np.arange(firststep, laststep, step)
         hxinc = np.sin(-kz*z - omega*times)
         fit = FittedSine(times, hx, kz, z, omega)
-        print("On step {}/{}, phi = {}".format(index, end - 1, fit.phi))
+        print("On step {}/{}, phi = {}".format(index - start + 1,
+                                               end - start, fit.phi))
         phi.append(fit.phi)
     phi = np.asarray(phi)
     hist, bins = np.histogram(phi)
@@ -84,11 +85,11 @@ def main():
     plt.bar(center, hist, align='center', width=width)
     plt.show()
 
-    # plt.plot(times, hxinc, 'b', label='incident')
-    # plt.plot(times, hx, 'r', label='scattered')
-    # plt.plot(times, fit(times), 'g', label='fit')
-    # plt.legend()
-    # plt.show()
+    plt.plot(times, hxinc, 'b', label='incident')
+    plt.plot(times, hx, 'r', label='scattered')
+    plt.plot(times, fit(times), 'g', label='fit')
+    plt.legend()
+    plt.show()
 
 
 if __name__ == '__main__':

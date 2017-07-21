@@ -10,8 +10,8 @@ c-----------------------------------------------------------------------
       include 'TOTAL'
       include 'EMWAVE'
 
-      common /userparam/ omega,period
-      real omega,period
+      common /userparam/ omega,period,lambda
+      real omega,period,lambda
 
       common /userincident/ ninc,incindex(lxzfl)
       integer ninc,incindex
@@ -110,8 +110,8 @@ c-----------------------------------------------------------------------
       include 'PML'
       include 'mpif.h'
 
-      common /userparam/ omega,period
-      real omega,period
+      common /userparam/ omega,period,lambda
+      real omega,period,lambda
 
       common /userincident/ ninc,incindex(lxzfl)
       integer ninc,incindex
@@ -134,16 +134,13 @@ c     is resolved.
       integer i,e,f,j,k,nx1_2,ierr
       integer disps(0:lp-1),tmp(0:lp-1)
       real xx,yy,zz,rr
-      real c0,lambda,twopi,tol
+      real c0,twopi,tol
       parameter (
      $     c0 = 299792458,      ! speed of light, in m/s
      $     twopi = 8.0*atan(1.0),
      $     tol = 1e-8)
 
-c     Wavelength of the incident wave, in m
-      lambda = 480e-9
 c     Nondimensionalize the wavelength
-      lambda = lambda/length
       omega = twopi/lambda
       period = twopi/omega
       if (nid.eq.0) then
@@ -271,24 +268,24 @@ c-----------------------------------------------------------------------
       common /scaling/ length,sxy,sz,radius,gap,cylbot,cyltop
       real length,sxy,sz,radius,gap,cylbot,cyltop
 
-      integer i,nz,nbufbot,nbuftop,ncyl
+      common /userparam/ omega,period,lambda
+      real omega,period,lambda
+
+      integer i
       real xmin,xmax,ymin,ymax,zmin,zmax,height
       real glmax,glmin
 
-c     Number of buffer layers on the bottom/top
-      nbufbot = 2
-      nbuftop = 2
-c     Number of layers in the cylinder
-      ncyl = 3
-      nz = 2*pmlthick+nbuftop+ncyl+nbufbot
 c     Characteristic length to use in nondimensionalization in m
       length = 100.0e-9
+c     Wavelength of the incident wave, in m
+      lambda = 633e-9
+      lambda = lambda/length
 c     Gap between cylinders in m
-      gap = 48e-9
+      gap = 46e-9
 c     Radius of the cylinder in m
-      radius = 115e-9
+      radius = 158e-9
 c     Height of the cylinder in m
-      height = 135e-9
+      height = 155e-9
 c     Nondimensionalize
       gap = gap/length
       radius = radius/length
@@ -296,8 +293,10 @@ c     Nondimensionalize
 
 c     Common xy scaling
       sxy = gap+2.0*radius
-c     Scale by (total layers)/(number of layers in cylinder)
-      sz = (dble(nz)/dble(ncyl))*height
+c     The total thickness is
+c
+c     (𝛌/2 PML) + (𝛌 buffer) + (cylinder) + (𝛌 buffer) + (𝛌/2 PML)
+      sz = 3*lambda+height
 
       xmin = glmin(xm1,npts)
       xmax = glmax(xm1,npts)
@@ -311,8 +310,8 @@ c     Scale by (total layers)/(number of layers in cylinder)
          ym1(i,1,1,1) = sxy*(ym1(i,1,1,1)-ymin)/(ymax-ymin)-0.5*sxy
          zm1(i,1,1,1) = sz*(zm1(i,1,1,1)-zmin)/(zmax-zmin)-0.5*sz
       enddo
-      cylbot = sz*(pmlthick+nbufbot)/dble(nz)-0.5*sz
-      cyltop = sz*(pmlthick+nbufbot+ncyl)/dble(nz)-0.5*sz
+      cylbot = -0.5*height
+      cyltop = 0.5*height
 
       xmin = glmin(xm1,npts)
       xmax = glmax(xm1,npts)
@@ -324,6 +323,8 @@ c     Scale by (total layers)/(number of layers in cylinder)
       if (nid.eq.0) then
          write(*,*) 'usrdat2: cylinder radius = ',radius
          write(*,*) 'usrdat2: cylinder height = ',height
+         write(*,*) 'usrdat2: cylinder bottom = ',cylbot
+         write(*,*) 'usrdat2: cylinder top = ',cyltop
          write(*,*) 'usrdat2: cylinder gap = ',gap
          write(*,*) 'usrdat2: xmin,xmax = ',xmin,xmax
          write(*,*) 'usrdat2: ymin,ymax = ',ymin,ymax
