@@ -133,9 +133,8 @@ c     is resolved.
       logical markinc,markout
       integer a,i,e,f,j,k,nx1_2,ierr
       integer disps(0:lp-1),tmp(0:lp-1)
-      integer ncyl, cylgap
-      real radc
-      real xx,yy,zz,rr,xc0
+      integer ncyl
+      real xx,yy,zz,rr,x0
       real c0,twopi,tol
       parameter (
      $     c0 = 299792458,      ! speed of light, in m/s
@@ -152,19 +151,15 @@ c     Nondimensionalize the wavelength
       endif
 
       nx1_2 = nx1/2
-c     Set the permittivities
-
-c     Building array of centers
-      cylgap = 1.5
       ncyl = 10
-      
-      do a = 1, ncyl
+c     Set the permittivities
+      do a = 1,ncyl         
          do e = 1,nelt
             xx = xm1(nx1_2,nx1_2,nx1_2,e)
             yy = ym1(nx1_2,nx1_2,nx1_2,e)
             zz = zm1(nx1_2,nx1_2,nx1_2,e)
-            xc0 = (a-1)*cylgap
-            rr = sqrt((xx-xc0)**2+yy**2)
+            x0 = (a-1)*gap
+            rr = sqrt((xx-x0)**2+yy**2)   
             if (rr.lt.radius.and.zz.gt.cylbot.and.zz.lt.cyltop) then
 c     Inside the resonator
                do i = 1,nxyz
@@ -182,7 +177,6 @@ c     Outside the resonator
             endif
          enddo
       enddo
-      
 c     Mark where the incident field needs to be added
       ninc = 0
       do e = 1,nelt
@@ -283,16 +277,15 @@ c-----------------------------------------------------------------------
       integer i
       real xmin,xmax,ymin,ymax,zmin,zmax,height
       real glmax,glmin
-      real centers(10), cyl(nelt)
 
 c     Characteristic length to use in nondimensionalization in m
       length = 100.0e-9
 c     Wavelength of the incident wave, in m
       lambda = 633e-9
       lambda = lambda/length
-c     Gap of the first cylinder in m
+c     Gap between cylinders in m
       gap = 40e-9
-c     Radius of the first cylinder
+c     Radius of the cylinder in m
       radius = 120e-9
 c     Height of the cylinder in m
       height = 155e-9
@@ -301,97 +294,8 @@ c     Nondimensionalize
       radius = radius/length
       height = height/length
 
-c      cylgap = 1.1666666
-c      ncyl = 10
-      
-c      do i = 1, ncyl
-c         centers(i) = (i-1)*cylgap
-c      enddo
-
-c     marking where is inside and outside cylinder before deformation
-c      do a = 1, ncyl
-c         do e = 1, nelt
-c            xx = xm1(nx1_2,nx1_2,nx1_2,e)
-c            yy = ym1(nx1_2,nx1_2,nx1_2,e)
-c            zz = zm1(nx1_2,nx1_2,nx1_2,e)
-c            xc0 = centers(a)
-c            rr = sqrt((xx-xc0)**2+yy**2)
-c            if (rr.lt.radius.and.zz.gt.cylbot.and.zz.lt.cyltop) then
-c     Inside the resonator
-c              cyl(e) = 1
-c            else
-c     Outside the resonator
-c              cyl(e) = 0
-c            endif
-c         enddo
-c      enddo
-
-
-c      DEFORMATION OF RADII
-
-c     setting permittivities after deformation
-      
-c      do e = 1, nelt
-c         if (cyl(e) = 1) then
-c     Inside the resonator
-c            do i = 1,nxyz
-c               j = i+nxyz*(e-1)
-c               permittivity(j) = 2.76**2
-c               permeability(j) = 1.0
-c            enddo
-c         else
-c     Outside the resonator
-c            do i = 1,nxyz
-c               j = i+nxyz*(e-1)
-c              permittivity(j) = 1.4
-c               permeability(j) = 1.0
-c            enddo
-c         endif
-c      enddo
-         
-         
-      
-
-c     Common xy scaling
-      sxy = gap+2.0*radius
-c     The total thickness is
-c
-c     (𝛌/2 PML) + (𝛌 buffer) + (cylinder) + (𝛌 buffer) + (𝛌/2 PML)
-      sz = 3*lambda+height
-
-      xmin = glmin(xm1,npts)
-      xmax = glmax(xm1,npts)
-      ymin = glmin(ym1,npts)
-      ymax = glmax(ym1,npts)
-      zmin = glmin(zm1,npts)
-      zmax = glmax(zm1,npts)
-
-c      do i = 1,npts
-c         xm1(i,1,1,1) = sxy*(xm1(i,1,1,1)-xmin)/(xmax-xmin)-0.5*sxy
-c         ym1(i,1,1,1) = sxy*(ym1(i,1,1,1)-ymin)/(ymax-ymin)-0.5*sxy
-c         zm1(i,1,1,1) = sz*(zm1(i,1,1,1)-zmin)/(zmax-zmin)-0.5*sz
-c      enddo
       cylbot = -0.5*height
       cyltop = 0.5*height
-
-      xmin = glmin(xm1,npts)
-      xmax = glmax(xm1,npts)
-      ymin = glmin(ym1,npts)
-      ymax = glmax(ym1,npts)
-      zmin = glmin(zm1,npts)
-      zmax = glmax(zm1,npts)
-
-      if (nid.eq.0) then
-         write(*,*) 'usrdat2: cylinder radius = ',radius
-         write(*,*) 'usrdat2: cylinder height = ',height
-         write(*,*) 'usrdat2: cylinder bottom = ',cylbot
-         write(*,*) 'usrdat2: cylinder top = ',cyltop
-         write(*,*) 'usrdat2: cylinder gap = ',gap
-         write(*,*) 'usrdat2: xmin,xmax = ',xmin,xmax
-         write(*,*) 'usrdat2: ymin,ymax = ',ymin,ymax
-         write(*,*) 'usrdat2: zmin,zmax = ',zmin,zmax
-      endif
-
       return
       end
 c-----------------------------------------------------------------------
