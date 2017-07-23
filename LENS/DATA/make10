@@ -1,0 +1,19 @@
+#!/bin/bash
+#                rad gap
+python makemesh.py 158 46 3 3
+python makemesh.py 157 46 3 3
+python makemesh.py 156 46 3 3
+python makemesh.py 155 46 3 3
+python makemesh.py 154 46 3 3
+python makemesh.py 153 46 3 3
+python makemesh.py 152 46 3 3
+python makemesh.py 151 46 3 3
+python makemesh.py 150 46 3 3
+python makemesh.py 149 46 3 3
+
+
+
+
+
+
+
