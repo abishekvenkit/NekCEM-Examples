@@ -9,6 +9,7 @@
 **/*.pyc
 
 # Build/run artifacts
+**/vtk
 **/*.vtk
 **/*.log
 **/*.output

@@ -168,7 +168,7 @@ c     Inside the resonator
 c     Outside the resonator
            do i = 1,nxyz
               j = i+nxyz*(e-1)
-              permittivity(j) = 1.4
+              permittivity(j) = 1.41**2
               permeability(j) = 1.0
            enddo
         endif
