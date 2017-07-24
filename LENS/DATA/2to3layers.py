@@ -7,37 +7,7 @@ from __future__ import division, print_function, absolute_import
 import sys
 import subprocess
 
-rad, gap, ll, lb = [int(x) for x in sys.argv[1:]]
-xy = ((rad+gap/2.0)/rad)*0.5 #using inputs of rad gap to get the proper stretch of mesh gap
-
-# build mesh based on radius gap ratio using PRETEXSCRIPT
-PRETEXSCRIPT = """\
-pretex << EOF
-newmesh
-   1 READ PREVIOUS PARAMETERS
-x7
-   1 BUILD FROM FILE
-x7
-   3 GLOBAL REFINE
-  11 STRETCH
-   7 Stretch Outside Circle
-.5  Input protected radius:
- -{}  {} Input new xminxmax (0,0 to scale): old -x; old +x
- -{}  {} Input new yminymax (0,0 to scale): old -y; old +y
-   1 UP MENU
-   1 END GLOBAL REFINE
-   4 CURVE SIDES
-   8 Convert Midside to Circle
-500  Input maxium radius:
-   1 BUILD MENU
-   1 END    ELEMENTS
-   1 ACCEPT MATL,QVOL
-   1 ACCEPT B.C.s
-   1 ACCEPT B.C.s
-   1 EXIT      
-EOF
-""".format(xy, xy, xy, xy)
-subprocess.call(['bash', '-c', PRETEXSCRIPT])
+ll, lb = [int(x) for x in sys.argv[1:]]
 
 #DEFINING LAYERS OF PML, BUFFER, AND LENS BELOW
 
@@ -46,6 +16,7 @@ num_lev = ((2*pml)+ll+(2*lb)) #number of layers total in mesh
 lmbda = 633.0 #wavelength of incoming wave
 h = 155.0 #height of lens
 lay = [0] #first layer
+rad = 120
 
 for i in range(1, num_lev):	 
     if i < pml+1 or i > num_lev-pml: #PML layers
@@ -79,8 +50,8 @@ with open('layers', 'w') as f:
 
 N2TO3SCRIPT = """\
 n2to3 << EOF
-newmesh 
-{}_{}
+original1 
+original1_3d
 0
 {}
 0
@@ -91,19 +62,5 @@ yes
 PML
 PML
 EOF
-""".format(rad,gap,num_lev, zmax)
+""".format(num_lev, zmax)
 subprocess.call(['bash', '-c', N2TO3SCRIPT])
-
-#genmap function
-
-# Input .rea / .re2 name:
-# Input mesh tolerance
-
-
-GENMAPSCRIPT = """\
-genmap << EOF
-{}_{}
-0.2
-EOF
-""".format(rad,gap)
-subprocess.call(['bash', '-c', GENMAPSCRIPT])

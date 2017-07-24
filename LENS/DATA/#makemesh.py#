@@ -15,9 +15,9 @@ PRETEXSCRIPT = """\
 pretex << EOF
 newmesh
    1 READ PREVIOUS PARAMETERS
-x7
+original
    1 BUILD FROM FILE
-x7
+original
    3 GLOBAL REFINE
   11 STRETCH
    7 Stretch Outside Circle
