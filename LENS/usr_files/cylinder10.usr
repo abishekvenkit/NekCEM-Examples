@@ -131,9 +131,9 @@ c     is resolved.
       integer ix,iy,iz,iel
 
       logical markinc,markout
-      integer i,e,f,j,k,nx1_2,ierr
+      integer a,i,e,f,j,k,nx1_2,ierr
       integer disps(0:lp-1),tmp(0:lp-1)
-      real xx,yy,zz,rr
+      real xx,yy,zz,rr,x0
       real c0,twopi,tol
       parameter (
      $     c0 = 299792458,      ! speed of light, in m/s
@@ -151,36 +151,39 @@ c     Nondimensionalize the wavelength
 
       nx1_2 = nx1/2
 c     Set the permittivities
-      do e = 1,nelt
-        xx = xm1(nx1_2,nx1_2,nx1_2,e)
-        yy = ym1(nx1_2,nx1_2,nx1_2,e)
-        zz = zm1(nx1_2,nx1_2,nx1_2,e)
-        rr = sqrt(xx**2+yy**2)
-        
-        if (zz.gt.cylbot.and.zz.lt.cyltop) then
+      do a = 1,11
+         do e = 1,nelt
+            xx = xm1(nx1_2,nx1_2,nx1_2,e)
+            yy = ym1(nx1_2,nx1_2,nx1_2,e)
+            zz = zm1(nx1_2,nx1_2,nx1_2,e)
+            x0 = ((radius*2)+(gap))*(a-1)
+            rr = sqrt((xx-x0)**2+yy**2)
+            
+            if (zz.gt.cylbot.and.zz.lt.cyltop) then
 c     Inside the resonator
-           if (rr.lt.radius) then
-              do i = 1,nxyz 
-                 j = i+nxyz*(e-1)
-                 permittivity(j) = 2.5031**2
-                 permeability(j) = 1.0
-              enddo
-           else 
+               if (rr.lt.radius) then
+                  do i = 1,nxyz 
+                     j = i+nxyz*(e-1)
+                     permittivity(j) = 2.5031**2
+                     permeability(j) = 1.0
+                  enddo
+               else 
 c     Inside the lens and Outside the resonator
-              do i = 1,nxyz
-                 j = i+nxyz*(e-1)
-                 permittivity(j) = 1.41**2
-                 permeability(j) = 1.0
-              enddo
-           endif
-        else
+                  do i = 1,nxyz
+                     j = i+nxyz*(e-1)
+                     permittivity(j) = 1.41**2
+                     permeability(j) = 1.0
+                  enddo
+               endif
+            else
 c     Outside the lens
-           do i = 1,nxyz
-              j = i+nxyz*(e-1)
-              permittivity(j) = 1.0
-              permeability(j) = 1.0
-           enddo
-        endif
+               do i = 1,nxyz
+                  j = i+nxyz*(e-1)
+                  permittivity(j) = 1.0
+                  permeability(j) = 1.0
+               enddo
+            endif
+         enddo
       enddo
 
 c     Mark where the incident field needs to be added
@@ -315,11 +318,11 @@ c     (𝛌/2 PML) + (𝛌 buffer) + (cylinder) + (𝛌 buffer) + (𝛌/2 PML)
       zmin = glmin(zm1,npts)
       zmax = glmax(zm1,npts)
 
-      do i = 1,npts
-         xm1(i,1,1,1) = sxy*(xm1(i,1,1,1)-xmin)/(xmax-xmin)-0.5*sxy
-         ym1(i,1,1,1) = sxy*(ym1(i,1,1,1)-ymin)/(ymax-ymin)-0.5*sxy
-         zm1(i,1,1,1) = sz*(zm1(i,1,1,1)-zmin)/(zmax-zmin)-0.5*sz
-      enddo
+c     do i = 1,npts
+c        xm1(i,1,1,1) = sxy*(xm1(i,1,1,1)-xmin)/(xmax-xmin)-0.5*sxy
+c         ym1(i,1,1,1) = sxy*(ym1(i,1,1,1)-ymin)/(ymax-ymin)-0.5*sxy
+c         zm1(i,1,1,1) = sz*(zm1(i,1,1,1)-zmin)/(zmax-zmin)-0.5*sz
+c      enddo
       cylbot = -0.5*height
       cyltop = 0.5*height
 
@@ -330,16 +333,16 @@ c     (𝛌/2 PML) + (𝛌 buffer) + (cylinder) + (𝛌 buffer) + (𝛌/2 PML)
       zmin = glmin(zm1,npts)
       zmax = glmax(zm1,npts)
 
-      if (nid.eq.0) then
-         write(*,*) 'usrdat2: cylinder radius = ',radius
-         write(*,*) 'usrdat2: cylinder height = ',height
-         write(*,*) 'usrdat2: cylinder bottom = ',cylbot
-         write(*,*) 'usrdat2: cylinder top = ',cyltop
-         write(*,*) 'usrdat2: cylinder gap = ',gap
-         write(*,*) 'usrdat2: xmin,xmax = ',xmin,xmax
-         write(*,*) 'usrdat2: ymin,ymax = ',ymin,ymax
-         write(*,*) 'usrdat2: zmin,zmax = ',zmin,zmax
-      endif
+c      if (nid.eq.0) then
+c         write(*,*) 'usrdat2: cylinder radius = ',radius
+c         write(*,*) 'usrdat2: cylinder height = ',height
+c         write(*,*) 'usrdat2: cylinder bottom = ',cylbot
+c         write(*,*) 'usrdat2: cylinder top = ',cyltop
+c         write(*,*) 'usrdat2: cylinder gap = ',gap
+c         write(*,*) 'usrdat2: xmin,xmax = ',xmin,xmax
+c         write(*,*) 'usrdat2: ymin,ymax = ',ymin,ymax
+c         write(*,*) 'usrdat2: zmin,zmax = ',zmin,zmax
+c      endif
 
       return
       end

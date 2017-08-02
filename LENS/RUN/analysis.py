@@ -28,7 +28,7 @@ class FittedSine():
         self.fit()
 
     def f(self, t, A, phi):
-        return A*np.sin(-self.kz*self.z - self.omega*t - phi)
+        return A*np.sin((-self.kz*self.z) - self.omega*t - phi)
 
     def jac(self, t, A, phi):
         out = np.empty((t.size, 2))
@@ -38,7 +38,9 @@ class FittedSine():
         return out
 
     def fit(self):
-        popt, _ = curve_fit(self.f, self.tdata, self.hdata)
+        bounds = ([0, 0], [np.inf, 2*np.pi])
+        popt, _ = curve_fit(self.f, self.tdata, self.hdata,
+                            bounds=bounds)
         self.A, self.phi = popt
 
     def __call__(self, t):
@@ -52,8 +54,8 @@ class FittedSine():
 
 
 def main():
-    firststep = 0
-    laststep = 100
+    firststep = 8000
+    laststep = 11000
     step = 25
 
     dt = 6.215e-3
@@ -77,7 +79,6 @@ def main():
         fit = FittedSine(times, hx, kz, z, omega)
         print("On step {}/{}, phi = {}".format(index - start + 1,
                                                end - start, fit.phi))
-        return fit.phi
         phi.append(fit.phi)
     phi = np.asarray(phi)
     hist, bins = np.histogram(phi)
@@ -86,11 +87,17 @@ def main():
 #    plt.bar(center, hist, align='center', width=width)
 #    plt.show()
 
-#    plt.plot(times, hxinc, 'b', label='incident')
-#    plt.plot(times, hx, 'r', label='scattered')
-#    plt.plot(times, fit(times), 'g', label='fit')
-#    plt.legend()
-#    plt.show()
+    print(fit.A)
+    plt.plot(times, hxinc, 'b', label='incident')
+    plt.plot(times, hx, 'r', label='scattered')
+    plt.plot(times, fit(times), 'g', label='fit')
+    plt.legend()
+    locs, labels = plt.xticks()
+    newlocs = np.linspace(min(locs), max(locs), 14)
+    plt.xticks(newlocs)
+    plt.grid()
+    plt.show()
+    return fit.phi
 
 
 if __name__ == '__main__':
