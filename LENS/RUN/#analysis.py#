@@ -43,7 +43,7 @@ class FittedSine():
                             bounds=bounds)
         self.A, self.phi = popt
 
-    def __call__(self, t):
+g    def __call__(self, t):
         return self.f(t, self.A, self.phi)
 
     def __repr__(self):
@@ -81,8 +81,6 @@ def main():
                                                end - start, fit.phi))
         phi.append(fit.phi)
     phi = np.asarray(phi)
-#    print (np.std(phi))
-#    phi = np.mean(phi)
     hist, bins = np.histogram(phi)
     width = 0.7*(bins[1] - bins[0])
     center = (bins[:-1] + bins[1:])/2

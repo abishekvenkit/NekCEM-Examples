@@ -161,7 +161,7 @@ c     Inside the resonator
            if (rr.lt.radius) then
               do i = 1,nxyz 
                  j = i+nxyz*(e-1)
-                 permittivity(j) = 2.9031**2
+                 permittivity(j) = 2.5031**2
                  permeability(j) = 1.0
               enddo
            else 

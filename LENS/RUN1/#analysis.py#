@@ -54,11 +54,11 @@ class FittedSine():
 
 
 def main():
-    firststep = 12000
-    laststep = 16075
+    firststep = 12025
+    laststep = 16150
     step = 25
 
-    dt = 6.21535e-3
+    dt = 4.7425e-3
     z = -7.1050072
     omega = .9926
     eps = 1.0
@@ -81,8 +81,6 @@ def main():
                                                end - start, fit.phi))
         phi.append(fit.phi)
     phi = np.asarray(phi)
-#    print (np.std(phi))
-#    phi = np.mean(phi)
     hist, bins = np.histogram(phi)
     width = 0.7*(bins[1] - bins[0])
     center = (bins[:-1] + bins[1:])/2

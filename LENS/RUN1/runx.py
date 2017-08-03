@@ -89,10 +89,10 @@ def main():
     for gap in gaps:
         for rad in radii:
             reaname = create_mesh(rad, gap, ll, lb)
-            run_nek(reaname)
-            phi = analysis.main()
-            with open('PHI', 'a+') as f:
-                f.write(str(rad) + '_' + str(gap)+' : ' + str(phi)+"\n") 
+#            run_nek(reaname)
+#            phi = analysis.main()
+#            with open('PHI', 'a+') as f:
+#                f.write(str(rad) + '_' + str(gap)+' : ' + str(phi)+"\n") 
 
 
 def run_make():
@@ -107,7 +107,7 @@ def run_nek(reaname):
 
 def config_layers(rad, gap, ll, lb):
     # number of pml layers
-    pml = 2
+    pml = 3
     # number of total layers in mesh
     num_lev = 2*pml + ll + 2*lb
     # wavelength of incoming wave
@@ -146,15 +146,15 @@ def create_mesh(rad, gap, ll, lb):
     script = GENMAPSCRIPT.format(reastem)
     subprocess.call(['bash', '-c', script])
     # Turn the Nek5000 read file into a NekCEM one
-    reaname = '{}.rea'.format(reastem)
-    with open('rea_start.txt', 'r') as f, open(reaname, 'r') as g:
-        start = f.readlines()
-        start[73] = '  {}\n'.format(rad*1e-9)
-        end = g.readlines()[141:]
-        readfile = start + end
-    with open(reaname, 'w') as g:
-        g.write(''.join(readfile))
-    return reaname
+#    reaname = '{}.rea'.format(reastem)
+#    with open('rea_start.txt', 'r') as f, open(reaname, 'r') as g:
+#        start = f.readlines()
+#        start[73] = '  {}\n'.format(rad*1e-9)
+#        end = g.readlines()[141:]
+#        readfile = start + end
+#    with open(reaname, 'w') as g:
+#        g.write(''.join(readfile))
+#    return reaname
 
 
 if __name__ == '__main__':
