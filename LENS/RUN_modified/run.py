@@ -211,27 +211,28 @@ def main():
     ll = 3
     lb = 3
     gaps = [46]
-    radii = [140]
+    radii = [158]
 
     firststep = 9000
     laststep = 10575
     step = 25
 
-    x = load_buf('vtk/xcoordinates.dat')
-    y = load_buf('vtk/ycoordinates.dat')
-    index = x.size//2
 
-    subprocess.call(['make', '-j4'], stdout=DEVNULL, stderr=DEVNULL)
+    subprocess.call(['./makenek', 'cylinder'], stdout=DEVNULL, stderr=DEVNULL)
     phis = []
     for gap in gaps:
         for rad in radii:
             reastem = create_mesh(rad, gap, ll, lb)
             subprocess.check_call(['./nek', reastem, '4'])
+            raise Exception
+            x = load_buf('vtk/xcoordinates.dat')
+            y = load_buf('vtk/ycoordinates.dat')
+            index = x.size//2
             A, phi = get_amplitude_and_phi(index, firststep,
                                            laststep, step)
-            os.remove('{}.rea'.format(reastem))
-            os.remove('{}.map'.format(reastem))
-            os.remove('{}.np=4.output'.format(reastem))
+#            os.remove('{}.rea'.format(reastem))
+#            os.remove('{}.map'.format(reastem))
+#            os.remove('{}.np=4.output'.format(reastem))
             phis.append(str(phi))
     with open('phi.txt', 'w') as f:
         f.write('\n'.join(phis))
