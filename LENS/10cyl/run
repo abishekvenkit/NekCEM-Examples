@@ -1,5 +1,0 @@
-#!/bin/bash
-
-./make10
-python scalemesh.py
-python connectmesh.py
